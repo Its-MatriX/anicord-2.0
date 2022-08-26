@@ -3,20 +3,37 @@
 from threading import Thread
 from time import sleep
 from PyQt5 import QtCore, QtGui, QtWidgets
-from os import _exit, listdir, remove
-from os.path import isfile, expanduser, split, sep
-from sys import argv
+from os import _exit, listdir, remove, mkdir
+from os.path import isfile, expanduser, split, sep, isdir
+from sys import argv, executable
 import requests
 from ctypes import WinDLL
 from PIL import Image
 import json
 
+IsExecutable = False
+
+if IsExecutable:
+    __file__ = executable
+
+AppDataRoaming = expanduser(
+    '~') + sep + 'AppData' + sep + 'Roaming' + sep + 'Anicord 2.0'
+
+if not isdir(AppDataRoaming):
+    mkdir(AppDataRoaming)
+
+
 class WinDLLs:
     user32 = WinDLL('user32')
 
+
+class image_colors:
+    pass
+
+
 try:
     try:
-        from style import AnicordColors
+        exec(open(AppDataRoaming + sep + 'style.py', 'r').read())
     except:
 
         class AnicordColors:
@@ -26,13 +43,11 @@ try:
             MainBGColor = (33, 46, 78)
             OnTranspHoverColor = (49, 68, 116)
 
-
     AnicordColors.MainColor = tuple(AnicordColors.MainColor)
     AnicordColors.HoverOnMainColor = tuple(AnicordColors.HoverOnMainColor)
     AnicordColors.FormBGColor = tuple(AnicordColors.FormBGColor)
     AnicordColors.MainBGColor = tuple(AnicordColors.MainBGColor)
     AnicordColors.OnTranspHoverColor = tuple(AnicordColors.OnTranspHoverColor)
-
 
     class DefaultAnicordColors:
         MainColor = (95, 237, 207)
@@ -41,15 +56,15 @@ try:
         MainBGColor = (33, 46, 78)
         OnTranspHoverColor = (49, 68, 116)
 
-
     RequiredImages = [
-        'Animation.png', 'Authorization.png', 'Close.png', 'Minus.png', 'Pin.png',
-        'PinDark.png', 'Run.png', 'Starting.png', 'Stop.png', 'Timer.png'
+        'Animation.png', 'Authorization.png', 'Close.png', 'Minus.png',
+        'Pin.png', 'PinDark.png', 'Run.png', 'Starting.png', 'Stop.png',
+        'Timer.png'
     ]
 
     Matches = 0
 
-    for file in listdir('./WhiteIcons/'):
+    for file in listdir('./WhiteIcons'):
         if file in RequiredImages:
             Matches += 1
 
@@ -58,7 +73,6 @@ try:
         exit(1)
 
     Recolored = []
-
 
     def RecolorImage(ImageLocation, r, g, b, name):
         print(f'Отрисовка {ImageLocation}')
@@ -71,7 +85,6 @@ try:
         ImagePIL.save(f"{name}")
 
         Recolored.append(ImageLocation)
-
 
     def recolorImages():
         # MainColor:
@@ -91,28 +104,27 @@ try:
         # Run.png
         # Stop.png
 
-        for file in listdir('./WhiteIcons/'):
+        for file in listdir('./WhiteIcons'):
             if file in [
-                    'Animation.png', 'Authorization.png', 'Minus.png', 'Pin.png',
-                    'Starting.png', 'Timer.png'
+                    'Animation.png', 'Authorization.png', 'Minus.png',
+                    'Pin.png', 'Starting.png', 'Timer.png'
             ]:
                 color = AnicordColors.MainColor
             else:
                 color = AnicordColors.MainBGColor
 
-            Thread(target=lambda: RecolorImage(f'./WhiteIcons/{file}', color[
-                0], color[1], color[2], f'./{file}')).start()
+            Thread(target=lambda: RecolorImage(f'WhiteIcons/{file}', color[
+                0], color[1], color[2], AppDataRoaming + sep + file)).start()
 
-        open('image_colors.py', 'w').write(
+        open(AppDataRoaming + sep + 'image_colors.py', 'w').write(
             f'class Colors:\n    MainColor = {AnicordColors.MainColor}\n    MainBGColor = {AnicordColors.MainBGColor}'
         )
 
         while len(Recolored) != len(RequiredImages):
             pass
 
-
     try:
-        import image_colors
+        exec(open(AppDataRoaming + sep + 'image_colors.py', 'r').read())
     except:
         recolorImages()
 
@@ -132,10 +144,11 @@ try:
     if ImCount != len(RequiredImages):
         recolorImages()
 except:
-    Reply = WinDLLs.user32.MessageBoxW(0, 'Возможно, это произошло из-за файла стиля. Вы хотите удалить его?',
-                                        'Не удалось запуститься', 4)
+    Reply = WinDLLs.user32.MessageBoxW(
+        0, 'Возможно, это произошло из-за файла стиля. Вы хотите удалить его?',
+        'Не удалось запуститься', 4)
     if Reply == 6:
-        remove('style.py')
+        remove(AppDataRoaming + sep + 'style.py')
 
     _exit(0)
 
@@ -387,7 +400,8 @@ class Ui_Application(QtWidgets.QMainWindow):
         self.Frames.setObjectName('Frames')
         self.IconFrames = PYQTHoverLabel(self.CentralWidget)
         self.IconFrames.setGeometry(QtCore.QRect(205, 95, 16, 16))
-        self.IconFrames.setPixmap(QtGui.QPixmap('Animation.png'))
+        self.IconFrames.setPixmap(
+            QtGui.QPixmap(AppDataRoaming + sep + 'Animation.png'))
         self.IconFrames.setScaledContents(True)
         self.IconFrames.setToolTip(
             'Примеры:\n'
@@ -434,7 +448,8 @@ class Ui_Application(QtWidgets.QMainWindow):
         self.StatusChangeDelay.setObjectName('StatusChangeDelay')
         self.IconTimer = PYQTHoverLabel(self.CentralWidget)
         self.IconTimer.setGeometry(QtCore.QRect(205, 185, 16, 16))
-        self.IconTimer.setPixmap(QtGui.QPixmap('Timer.png'))
+        self.IconTimer.setPixmap(
+            QtGui.QPixmap(AppDataRoaming + sep + 'Timer.png'))
         self.IconTimer.setScaledContents(True)
         self.IconTimer.setToolTip(
             'Задержка между изменениями статусов (в секундах)')
@@ -451,8 +466,8 @@ class Ui_Application(QtWidgets.QMainWindow):
             '    font: 87 8pt \'Segoe UI Black\';\n'
             '}')
         ObjectIcon = QtGui.QIcon()
-        ObjectIcon.addPixmap(QtGui.QPixmap('Run.png'), QtGui.QIcon.Normal,
-                             QtGui.QIcon.Off)
+        ObjectIcon.addPixmap(QtGui.QPixmap(AppDataRoaming + sep + 'Run.png'),
+                             QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.Runner.setIcon(ObjectIcon)
         self.Runner.setIconSize(QtCore.QSize(13, 13))
         self.Runner.setObjectName('Runner')
@@ -480,8 +495,8 @@ class Ui_Application(QtWidgets.QMainWindow):
             '    font: 63 8pt \'Segoe UI Variable Small Semibol\';\n'
             '}')
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap('Close.png'), QtGui.QIcon.Normal,
-                       QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(AppDataRoaming + sep + 'Close.png'),
+                       QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.PanelClose.setIcon(icon)
         self.PanelClose.setIconSize(QtCore.QSize(13, 13))
         self.PanelClose.setObjectName('PanelClose')
@@ -497,8 +512,8 @@ class Ui_Application(QtWidgets.QMainWindow):
             '    font: 63 8pt \'Segoe UI Variable Small Semibol\';\n'
             '}')
         ObjectIcon = QtGui.QIcon()
-        ObjectIcon.addPixmap(QtGui.QPixmap('Pin.png'), QtGui.QIcon.Normal,
-                             QtGui.QIcon.Off)
+        ObjectIcon.addPixmap(QtGui.QPixmap(AppDataRoaming + sep + 'Pin.png'),
+                             QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.PanelPin.setIcon(ObjectIcon)
         self.PanelPin.setIconSize(QtCore.QSize(16, 16))
         self.PanelPin.setObjectName('PanelPin')
@@ -514,8 +529,8 @@ class Ui_Application(QtWidgets.QMainWindow):
             '    font: 63 8pt \'Segoe UI Variable Small Semibol\';\n'
             '}')
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap('Minus.png'), QtGui.QIcon.Normal,
-                        QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap(AppDataRoaming + sep + 'Minus.png'),
+                        QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.PanelHide.setIcon(icon2)
         self.PanelHide.setIconSize(QtCore.QSize(16, 16))
         self.PanelHide.setObjectName('PanelHide')
@@ -564,7 +579,8 @@ class Ui_Application(QtWidgets.QMainWindow):
         self.RunnerButtonChangeSignal.connect(self.RunnerButtonChangeEvent)
 
     def LoadStyle(self):
-        Reply = WinDLLs.user32.MessageBoxW(0, 'Хотите открыть папку с примерами?', 'Выбор стиля', 4)
+        Reply = WinDLLs.user32.MessageBoxW(
+            0, 'Хотите открыть папку с примерами?', 'Выбор стиля', 4)
 
         if Reply == 6:
             DefaultLocation = split(__file__)[0] + sep + 'Examples'
@@ -607,7 +623,7 @@ class Ui_Application(QtWidgets.QMainWindow):
                 f'    FormBGColor = {fileContent["FormBGColor"]}\n'+\
                 f'    OnTranspHoverColor = {fileContent["OnTranspHoverColor"]}\n'
 
-        open('style.py', 'w').write(build)
+        open(AppDataRoaming + sep + 'style.py', 'w').write(build)
 
         WinDLLs.user32.MessageBoxW(
             0, 'Запустите программу повторно, чтобы применить стиль.',
@@ -615,11 +631,11 @@ class Ui_Application(QtWidgets.QMainWindow):
         _exit(0)
 
     def SetAppStyle(self):
-        if isfile('style.py'):
+        if isfile(AppDataRoaming + sep + 'style.py'):
             Reply = WinDLLs.user32.MessageBoxW(0, 'Вы хотите удалить стиль?',
                                                'style.py уже найден.', 4)
             if Reply == 6:
-                remove('style.py')
+                remove(AppDataRoaming + sep + 'style.py')
                 _exit(0)
 
             else:
@@ -680,7 +696,7 @@ class Ui_Application(QtWidgets.QMainWindow):
             '    font: 87 8pt \'Segoe UI Black\';\n'
             '}',
             'icon':
-            'Starting.png'
+            AppDataRoaming + sep + 'Starting.png'
         })
 
         Token = self.Authorization.text()
@@ -701,7 +717,7 @@ class Ui_Application(QtWidgets.QMainWindow):
                 '    font: 87 8pt \'Segoe UI Black\';\n'
                 '}',
                 'icon':
-                'Run.png'
+                AppDataRoaming + sep + 'Run.png'
             })
 
             WinDLLs.user32.MessageBoxW(0, 'Токен пуст.', 'Произошла ошибка',
@@ -723,7 +739,7 @@ class Ui_Application(QtWidgets.QMainWindow):
                 '    font: 87 8pt \'Segoe UI Black\';\n'
                 '}',
                 'icon':
-                'Run.png'
+                AppDataRoaming + sep + 'Run.png'
             })
 
             WinDLLs.user32.MessageBoxW(0, 'Укажите статусы.',
@@ -745,7 +761,7 @@ class Ui_Application(QtWidgets.QMainWindow):
                 '    font: 87 8pt \'Segoe UI Black\';\n'
                 '}',
                 'icon':
-                'Run.png'
+                AppDataRoaming + sep + 'Run.png'
             })
 
             WinDLLs.user32.MessageBoxW(
@@ -768,7 +784,7 @@ class Ui_Application(QtWidgets.QMainWindow):
                 '    font: 87 8pt \'Segoe UI Black\';\n'
                 '}',
                 'icon':
-                'Run.png'
+                AppDataRoaming + sep + 'Run.png'
             })
 
             WinDLLs.user32.MessageBoxW(
@@ -793,7 +809,7 @@ class Ui_Application(QtWidgets.QMainWindow):
                 '    font: 87 8pt \'Segoe UI Black\';\n'
                 '}',
                 'icon':
-                'Run.png'
+                AppDataRoaming + sep + 'Run.png'
             })
 
             WinDLLs.user32.MessageBoxW(0, 'Токен неверен.', 'Произошла ошибка',
@@ -817,7 +833,7 @@ class Ui_Application(QtWidgets.QMainWindow):
             '    font: 87 8pt \'Segoe UI Black\';\n'
             '}',
             'icon':
-            'Stop.png'
+            AppDataRoaming + sep + 'Stop.png'
         })
 
         Statuses = Statuses.split('\n')
