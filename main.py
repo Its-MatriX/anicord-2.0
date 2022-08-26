@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*-
 
+# Created by ItsMatriX
+
+# Discord: 404 - Not Found#9176
+# Server: https://discord.gg/EC4tDfQYwf
+
+import json
+from ctypes import WinDLL
+from os import _exit, listdir, mkdir, remove
+from os.path import expanduser, isdir, isfile, sep, split
+from sys import argv
 from threading import Thread
 from time import sleep
-from PyQt5 import QtCore, QtGui, QtWidgets
-from os import _exit, listdir, remove, mkdir
-from os.path import isfile, expanduser, split, sep, isdir
-from sys import argv, executable
+
 import requests
-from ctypes import WinDLL
 from PIL import Image
-import json
-
-IsExecutable = False
-
-if IsExecutable:
-    __file__ = executable
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 AppDataRoaming = expanduser(
     '~') + sep + 'AppData' + sep + 'Roaming' + sep + 'Anicord 2.0'
@@ -75,16 +76,15 @@ try:
     Recolored = []
 
     def RecolorImage(ImageLocation, r, g, b, name):
-        print(f'Отрисовка {ImageLocation}')
         ImagePIL = Image.open(ImageLocation)
         Pixels = ImagePIL.load()
         for i in range(0, ImagePIL.size[0]):
             for j in range(0, ImagePIL.size[1]):
                 Pixels[i, j] = (r, g, b, Pixels[i, j][3])
                 ImagePIL.putpixel((i, j), Pixels[i, j])
-        ImagePIL.save(f"{name}")
-
         Recolored.append(ImageLocation)
+        ImagePIL.save(f"{name}")
+        print(f'Redrawed {ImageLocation}')
 
     def recolorImages():
         # MainColor:
@@ -96,13 +96,12 @@ try:
         # Timer.png
 
         # FormBGColor:
-        # None
+        # Run.png
+        # Stop.png
 
         # MainBGColor:
         # Close.png
         # PinDark.png
-        # Run.png
-        # Stop.png
 
         for file in listdir('./WhiteIcons'):
             if file in [
@@ -110,15 +109,19 @@ try:
                     'Pin.png', 'Starting.png', 'Timer.png'
             ]:
                 color = AnicordColors.MainColor
-            else:
+            elif file in ['Close.png', 'PinDark.png']:
                 color = AnicordColors.MainBGColor
+            elif file in ['Run.png', 'Stop.png']:
+                color = AnicordColors.FormBGColor
 
             Thread(target=lambda: RecolorImage(f'WhiteIcons/{file}', color[
                 0], color[1], color[2], AppDataRoaming + sep + file)).start()
 
-        open(AppDataRoaming + sep + 'image_colors.py', 'w').write(
-            f'class Colors:\n    MainColor = {AnicordColors.MainColor}\n    MainBGColor = {AnicordColors.MainBGColor}'
-        )
+        open(AppDataRoaming + sep + 'image_colors.py',
+             'w').write('class Colors:\n'
+                        f'    MainColor = {AnicordColors.MainColor}\n'
+                        f'    MainBGColor = {AnicordColors.MainBGColor}\n'
+                        f'    FormBGColor = {AnicordColors.FormBGColor}')
 
         while len(Recolored) != len(RequiredImages):
             pass
@@ -127,21 +130,24 @@ try:
         exec(open(AppDataRoaming + sep + 'image_colors.py', 'r').read())
     except:
         recolorImages()
+        exec(open(AppDataRoaming + sep + 'image_colors.py', 'r').read())
 
     try:
         if (image_colors.Colors.MainColor != AnicordColors.MainColor) or (
-                image_colors.Colors.MainBGColor != AnicordColors.MainBGColor):
+                image_colors.Colors.MainBGColor != AnicordColors.MainBGColor
+        ) or (image_colors.Colors.FormBGColor != AnicordColors.FormBGColor):
             recolorImages()
     except:
         pass
 
     ImCount = 0
 
-    for file in listdir('./'):
+    for file in listdir(AppDataRoaming + sep + './'):
         if file in RequiredImages:
             ImCount += 1
 
     if ImCount != len(RequiredImages):
+        print('Recolor: At line 141')
         recolorImages()
 except:
     Reply = WinDLLs.user32.MessageBoxW(
@@ -580,7 +586,7 @@ class Ui_Application(QtWidgets.QMainWindow):
 
     def LoadStyle(self):
         Reply = WinDLLs.user32.MessageBoxW(
-            0, 'Хотите открыть папку с примерами?', 'Выбор стиля', 4)
+            0, 'Открыть папку с примерами для выбора стиля?', 'Выбор стиля', 4)
 
         if Reply == 6:
             DefaultLocation = split(__file__)[0] + sep + 'Examples'
@@ -616,11 +622,11 @@ class Ui_Application(QtWidgets.QMainWindow):
                                            'Ошибка', 0x10)
                 return
 
-        build = 'class AnicordColors:\n'+\
-                f'    MainColor = {fileContent["MainColor"]}\n'+\
-                f'    HoverOnMainColor = {fileContent["HoverOnMainColor"]}\n'+\
-                f'    MainBGColor = {fileContent["MainBGColor"]}\n'+\
-                f'    FormBGColor = {fileContent["FormBGColor"]}\n'+\
+        build = 'class AnicordColors:\n' +\
+                f'    MainColor = {fileContent["MainColor"]}\n' +\
+                f'    HoverOnMainColor = {fileContent["HoverOnMainColor"]}\n' +\
+                f'    MainBGColor = {fileContent["MainBGColor"]}\n' +\
+                f'    FormBGColor = {fileContent["FormBGColor"]}\n' +\
                 f'    OnTranspHoverColor = {fileContent["OnTranspHoverColor"]}\n'
 
         open(AppDataRoaming + sep + 'style.py', 'w').write(build)
@@ -632,8 +638,8 @@ class Ui_Application(QtWidgets.QMainWindow):
 
     def SetAppStyle(self):
         if isfile(AppDataRoaming + sep + 'style.py'):
-            Reply = WinDLLs.user32.MessageBoxW(0, 'Вы хотите удалить стиль?',
-                                               'style.py уже найден.', 4)
+            Reply = WinDLLs.user32.MessageBoxW(0, 'Удалить стиль?',
+                                               'Выбор стиля', 4)
             if Reply == 6:
                 remove(AppDataRoaming + sep + 'style.py')
                 _exit(0)
@@ -660,7 +666,7 @@ class Ui_Application(QtWidgets.QMainWindow):
                 '    font: 87 8pt \'Segoe UI Black\';\n'
                 '}',
                 'icon':
-                'Run.png'
+                AppDataRoaming + sep + 'Run.png'
             })
 
             return
@@ -678,7 +684,7 @@ class Ui_Application(QtWidgets.QMainWindow):
             '    font: 87 8pt \'Segoe UI Black\';\n'
             '}',
             'icon':
-            'Run.png'
+            AppDataRoaming + sep + 'Run.png'
         })
 
         self.IsStarting = True
@@ -996,8 +1002,9 @@ class Ui_Application(QtWidgets.QMainWindow):
                 '    font: 63 8pt \'Segoe UI Variable Small Semibol\';\n'
                 '}')
             ObjectIcon = QtGui.QIcon()
-            ObjectIcon.addPixmap(QtGui.QPixmap('Pin.png'), QtGui.QIcon.Normal,
-                                 QtGui.QIcon.Off)
+            ObjectIcon.addPixmap(
+                QtGui.QPixmap(AppDataRoaming + sep + 'Pin.png'),
+                QtGui.QIcon.Normal, QtGui.QIcon.Off)
             self.PanelPin.setIcon(ObjectIcon)
         else:
             self.PanelPin.setStyleSheet(
@@ -1010,8 +1017,9 @@ class Ui_Application(QtWidgets.QMainWindow):
                 '    font: 63 8pt \'Segoe UI Variable Small Semibol\';\n'
                 '}')
             ObjectIcon = QtGui.QIcon()
-            ObjectIcon.addPixmap(QtGui.QPixmap('PinDark.png'),
-                                 QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            ObjectIcon.addPixmap(
+                QtGui.QPixmap(AppDataRoaming + sep + 'PinDark.png'),
+                QtGui.QIcon.Normal, QtGui.QIcon.Off)
             self.PanelPin.setIcon(ObjectIcon)
 
         if self.IsPinned:
