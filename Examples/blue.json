@@ -1,0 +1,7 @@
+{
+    "MainColor": [0, 0, 255],
+    "HoverOnMainColor": [0, 0, 204],
+    "FormBGColor": [0, 0, 153],
+    "MainBGColor": [0, 0, 101],
+    "OnTranspHoverColor": [0, 0, 139]
+}
