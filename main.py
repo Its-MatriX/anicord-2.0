@@ -3,7 +3,7 @@
 # Created by ItsMatriX
 
 # Discord: 404 - Not Found#9176
-# Server: https://discord.gg/EC4tDfQYwf
+# Guild: https://discord.gg/EC4tDfQYwf
 
 import json
 from ctypes import WinDLL
@@ -24,11 +24,10 @@ if not isdir(AppDataRoaming):
     mkdir(AppDataRoaming)
 
 
-class WinDLLs:
-    user32 = WinDLL('user32')
+class WindowsDLLs:
+    WindowsUser32DLL = WinDLL('user32.dll')
 
-
-class image_colors:
+class Colors:
     pass
 
 
@@ -36,7 +35,6 @@ try:
     try:
         exec(open(AppDataRoaming + sep + 'style.py', 'r').read())
     except:
-
         class AnicordColors:
             MainColor = (95, 237, 207)
             HoverOnMainColor = (74, 186, 162)
@@ -133,9 +131,9 @@ try:
         exec(open(AppDataRoaming + sep + 'image_colors.py', 'r').read())
 
     try:
-        if (image_colors.Colors.MainColor != AnicordColors.MainColor) or (
-                image_colors.Colors.MainBGColor != AnicordColors.MainBGColor
-        ) or (image_colors.Colors.FormBGColor != AnicordColors.FormBGColor):
+        if (Colors.MainColor != AnicordColors.MainColor) or (
+                Colors.MainBGColor != AnicordColors.MainBGColor) or (
+                    Colors.FormBGColor != AnicordColors.FormBGColor):
             recolorImages()
     except:
         pass
@@ -150,7 +148,7 @@ try:
         print('Recolor: At line 141')
         recolorImages()
 except:
-    Reply = WinDLLs.user32.MessageBoxW(
+    Reply = WindowsDLLs.WindowsUser32DLL.MessageBoxW(
         0, 'Возможно, это произошло из-за файла стиля. Вы хотите удалить его?',
         'Не удалось запуститься', 4)
     if Reply == 6:
@@ -397,7 +395,7 @@ class Ui_Application(QtWidgets.QMainWindow):
         self.Authorization.setObjectName('Authorization')
         self.IconAuthorization = PYQTHoverLabel(self.CentralWidget)
         self.IconAuthorization.setGeometry(QtCore.QRect(205, 50, 16, 16))
-        self.IconAuthorization.setPixmap(QtGui.QPixmap('Authorization.png'))
+        self.IconAuthorization.setPixmap(QtGui.QPixmap(AppDataRoaming + sep + 'Authorization.png'))
         self.IconAuthorization.setScaledContents(True)
         self.IconAuthorization.setToolTip('Токен учётной записи Discord.')
         self.IconAuthorization.setObjectName('IconAuthorization')
@@ -585,7 +583,7 @@ class Ui_Application(QtWidgets.QMainWindow):
         self.RunnerButtonChangeSignal.connect(self.RunnerButtonChangeEvent)
 
     def LoadStyle(self):
-        Reply = WinDLLs.user32.MessageBoxW(
+        Reply = WindowsDLLs.WindowsUser32DLL.MessageBoxW(
             0, 'Открыть папку с примерами для выбора стиля?', 'Выбор стиля', 4)
 
         if Reply == 6:
@@ -605,7 +603,7 @@ class Ui_Application(QtWidgets.QMainWindow):
         try:
             fileContent = json.loads(open(file, 'r').read())
         except Exception as e:
-            WinDLLs.user32.MessageBoxW(0, f'{type(e)} -> {e}',
+            WindowsDLLs.WindowsUser32DLL.MessageBoxW(0, f'{type(e)} -> {e}',
                                        'Ошибка JSON декодирования', 0x10)
             return
 
@@ -618,7 +616,7 @@ class Ui_Application(QtWidgets.QMainWindow):
 
         for key in keys:
             if key not in components:
-                WinDLLs.user32.MessageBoxW(0, f'Ключ {key} не найден.',
+                WindowsDLLs.WindowsUser32DLL.MessageBoxW(0, f'Ключ {key} не найден.',
                                            'Ошибка', 0x10)
                 return
 
@@ -631,14 +629,14 @@ class Ui_Application(QtWidgets.QMainWindow):
 
         open(AppDataRoaming + sep + 'style.py', 'w').write(build)
 
-        WinDLLs.user32.MessageBoxW(
+        WindowsDLLs.WindowsUser32DLL.MessageBoxW(
             0, 'Запустите программу повторно, чтобы применить стиль.',
             'Стиль успешно загружен', 64)
         _exit(0)
 
     def SetAppStyle(self):
         if isfile(AppDataRoaming + sep + 'style.py'):
-            Reply = WinDLLs.user32.MessageBoxW(0, 'Удалить стиль?',
+            Reply = WindowsDLLs.WindowsUser32DLL.MessageBoxW(0, 'Удалить стиль?',
                                                'Выбор стиля', 4)
             if Reply == 6:
                 remove(AppDataRoaming + sep + 'style.py')
@@ -726,7 +724,7 @@ class Ui_Application(QtWidgets.QMainWindow):
                 AppDataRoaming + sep + 'Run.png'
             })
 
-            WinDLLs.user32.MessageBoxW(0, 'Токен пуст.', 'Произошла ошибка',
+            WindowsDLLs.WindowsUser32DLL.MessageBoxW(0, 'Токен пуст.', 'Произошла ошибка',
                                        0x10)
 
             return
@@ -748,7 +746,7 @@ class Ui_Application(QtWidgets.QMainWindow):
                 AppDataRoaming + sep + 'Run.png'
             })
 
-            WinDLLs.user32.MessageBoxW(0, 'Укажите статусы.',
+            WindowsDLLs.WindowsUser32DLL.MessageBoxW(0, 'Укажите статусы.',
                                        'Произошла ошибка', 0x10)
 
             return
@@ -770,7 +768,7 @@ class Ui_Application(QtWidgets.QMainWindow):
                 AppDataRoaming + sep + 'Run.png'
             })
 
-            WinDLLs.user32.MessageBoxW(
+            WindowsDLLs.WindowsUser32DLL.MessageBoxW(
                 0, 'Укажите минимум 2 статуса, разделяя их новой строкой.',
                 'Произошла ошибка', 0x10)
 
@@ -793,7 +791,7 @@ class Ui_Application(QtWidgets.QMainWindow):
                 AppDataRoaming + sep + 'Run.png'
             })
 
-            WinDLLs.user32.MessageBoxW(
+            WindowsDLLs.WindowsUser32DLL.MessageBoxW(
                 0, f'Пустой текст на строке {HasNoVoidLnes(Statuses)}.',
                 'Произошла ошибка', 0x10)
 
@@ -818,7 +816,7 @@ class Ui_Application(QtWidgets.QMainWindow):
                 AppDataRoaming + sep + 'Run.png'
             })
 
-            WinDLLs.user32.MessageBoxW(0, 'Токен неверен.', 'Произошла ошибка',
+            WindowsDLLs.WindowsUser32DLL.MessageBoxW(0, 'Токен неверен.', 'Произошла ошибка',
                                        0x10)
 
             return
