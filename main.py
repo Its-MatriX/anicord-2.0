@@ -2,8 +2,8 @@
 
 # Created by ItsMatriX
 
-# Discord: 404 - Not Found#9176
-# Guild: https://discord.gg/EC4tDfQYwf
+# Discord: 404 - Not Found#3020
+# Guild: https://discord.gg/veVcKK6NZJ
 
 import json
 from ctypes import WinDLL
